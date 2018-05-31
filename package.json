@@ -1,0 +1,32 @@
+{
+  "name": "eventemitter",
+  "version": "0.1.0",
+  "description": "An eventemitter",
+  "main": "index.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --inline --port 8082 --host 0.0.0.0",
+    "release": "webpack"
+  },
+  "keywords": [
+    "event",
+    "emii",
+    "emitter"
+  ],
+  "author": "redmed",
+  "license": "ISC",
+  "devDependencies": {
+    "astrobench": "^0.1.2",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
+    "jasmine": "^3.1.0",
+    "webpack": "^4.10.2",
+    "webpack-cli": "^2.1.4",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
