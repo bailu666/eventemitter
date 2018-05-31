@@ -2,16 +2,16 @@ var path = require('path');
 
 module.exports = {
     entry: {
-        'eventemitter': './src/EventEmitter',
+        'EventEmitter': './index',
     },
-    mode: 'development',
+    mode: 'production',
     devtool: false,
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, './dist'),
-        library: 'EventEmiiter',
+        // library: 'EventEmiiter',
         libraryTarget: 'umd',
-        umdNamedDefine: true,
+        // umdNamedDefine: true,
     },
     module: {
         rules: [

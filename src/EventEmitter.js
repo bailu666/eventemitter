@@ -1,6 +1,6 @@
 /**
  * @file 事件封装类
- * @author redmed
+ * @author qiaogang
  */
 
 import { assign, trim } from './Util';
@@ -254,6 +254,10 @@ class EventEmitter {
         return this.__events__;
     }
 
+    /**
+     * 唯一标识
+     * @returns {number}
+     */
     get id() {
         return this.__id__;
     }
