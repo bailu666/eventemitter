@@ -5,9 +5,9 @@ export function assign(target, ...args) {
 
     let i = -1, len = args.length;
     while (++i < len) {
-        let source = args[i];
+        const source = args[i];
         if (source != null) {
-            for (let key in source) {
+            for (const key in source) {
                 if (source.hasOwnProperty(key)) {
                     target[key] = source[key];
                 }
@@ -20,4 +20,8 @@ export function assign(target, ...args) {
 
 export function trim(str) {
     return str.replace(/^\s+|\s+$/g, '')
+}
+
+export function isNul(v) {
+    return v == undefined
 }

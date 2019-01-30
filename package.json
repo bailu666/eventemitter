@@ -1,14 +1,13 @@
 {
-  "name": "eventemitter",
-  "version": "0.1.0",
-  "description": "An eventemitter",
+  "name": "@redmed/eventemitter",
+  "version": "1.0.0",
+  "description": "An EventEmitter Class",
   "main": "index.js",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --inline --port 8082 --host 0.0.0.0",
+    "dev": "webpack-dev-server --inline --port 8082 --host 0.0.0.0 --config webpack.dev.config.js",
     "release": "webpack"
   },
   "keywords": [
