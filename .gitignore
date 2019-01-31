@@ -1,7 +1,3 @@
-# Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
-
 # IntelliJ project files
 .idea
 *.iml
@@ -11,3 +7,4 @@ brower_components/
 asset/
 *.log
 demo/
+webpack.dev.config.js
