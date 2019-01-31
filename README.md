@@ -31,20 +31,21 @@ engine.emit('start', {});
 
 这两个问题如果继续使用上面的方式实现，代码就掉入了类似 callback hell 的深渊。
 
-于是我们想到了一个打破深渊的办法 —— 增加一个 `addEventParent` 方法来实现 **多层事件传递**。我们来看下它的用法：
+于是我们想到了一个打破深渊的办法 —— 增加一个 `addEventParent` 方法来实现 **多层事件传递**，即通过添加一个父级对象，将当前对象的事件冒泡到他的父级上。   
+我们来看下它的用法：
 
 ```js
 const engine = new EventEmitter();
 const car = new EventEmitter();
-// 通过 addEventParent 将 engine 和 car 链接，作为 EventParent 的 engine 触发的事件都会传递到 car 上。
-car.addEventParent(engine);
-// 为了使事件传递可控，我们用第三个参数控制是否传递至事件。
+// 通过 addEventParent 为 engine 添加一个父级事件节点 car，当 engine 派发一个事件时，可以将事件冒泡至他的父级 car 上。
+engine.addEventParent(car);
+// 为了使事件可以冒泡至父级，调用 emit 时，通过第三个参数控制事件的冒泡。
 // 发动机启动会传递至车辆上
 engine.emit('start', {}, true);
 
-// 如果希望里程表 odometer 也获得 start 事件，则继续链接 car 与 odometer 即可
+// 如果希望里程表 odometer 也获得 start 事件，为 car 添加父级事件节点 odometer 即可
 const odometer = new EventEmitter();
-odometer.addEventParent(car);
+car.addEventParent(odometer);
 ```
 好了，至此对于造轮子的原因解释完毕。如果你的实践中有这种多层事件传递的场景，可以考虑使用这个 EE。
 
@@ -67,9 +68,7 @@ const ee = new EventEmitter()
 import { EventEmitter } from 'EventEmitter'
 
 class Car extends EventEmitter {
-    constructor() {
-        
-    }
+    constructor() { }
     
     doSome() {
         this.emit('some')
@@ -81,9 +80,14 @@ class Car extends EventEmitter {
 
 参数：
 
-+ type {string} 事件名称
++ type {string} 事件名称，多个事件名可用空格分开
 + fn {Function} 回调函数
 + content {*=} fn 回调上下文
+
+其中 fn 回调参数 `Event` 结构为：  
+
++ event.type {string} 事件名
++ event.target {EventEmitter} 触发事件的对象
 
 返回：
 
@@ -110,17 +114,69 @@ ee.once('load', ev => { })
 
 + EventEmitter
 
-#### 5. 添加事件链 addEventParent(ee, fn?)
+
+#### 5. 触发事件 emit(type, obj?, propagate?) 
 
 参数：
 
-+ ee {EventEmitter} 为当前对象添加父级关联，父级触发事件则当前对象同时触发
-+ fn {Function=} 父级事件触发时的回调函数，可以在原有回调参数上进行修改
++ type {string} 事件名
++ obj {object=} 参数，会被 merge 到 event 中。注意 object 中不要使用 `type`和 `target` 关键词，否则会覆盖原始参数。
++ propagate {boolean=} 当前事件是否冒泡至父级事件节点。默认不冒泡。 
 
 返回：
 
 + EventEmitter
 
-```js
+#### 6. 添加父级事件节点 addEventParent(ee, fn?)
 
+参数：
+
++ ee {EventEmitter} 为当前对象添加父级节点，当前对象事件触发后，可以冒泡至父级节点
++ fn {Function=} 触发父级节点时，可通过该回调函数修改原有回调参数。需要将修改后的参数返回。
+
+返回：
+
++ EventEmitter
+
+依旧用发动机 engine 和汽车 car 这个场景说明：  
+
+> ##### 1. engine start 后，car 也跟着 start。并且获取了 engine 派发的信息。
+
+```js
+const engine = new EventEmitter();
+const car = new EventEmitter();
+car.on('start', ev => {
+    console.log('car: ', ev.msg);
+});
+engine.addEventParent(car);
+
+engine.emit('start', {
+    msg: '我发动了!'
+}, true);
+
+// log: "car: 我发动了!"
 ```
+
+> ##### 2. engine start 后，car 也跟着 start，并且添加了 car 自己特有的的信息。
+
+```js
+// 创建同上
+car.on('start', ev => {
+    console.log('car: ', ev.msg);
+    console.log('car name: ', ev.name);
+});
+engine.addEventParent(car, ev => {
+    ev.name = 'Benz';
+    return ev;
+});
+
+engine.emit('start', {
+    msg: '我发动了!'
+}, true);
+
+// log: "car: 我发动了!"
+// log: "car name: Benz";
+```
+
+至此关于 EE 的全部就介绍完了，希望如果这个 EE 对你有帮助，欢迎使用。:D
+
