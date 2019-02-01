@@ -1,1 +1,5 @@
-export { default as EventEmitter } from './src/EventEmitter';
+import { EventEmitter } from './src/EventEmitter';
+export default EventEmitter;
+export {
+    EventEmitter
+}

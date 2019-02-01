@@ -1,14 +1,13 @@
 {
-  "name": "eventemitter",
-  "version": "0.1.0",
-  "description": "An eventemitter",
+  "name": "@redm/eventemitter",
+  "version": "0.9.0",
+  "description": "An EventEmitter Class. Support add event parent.",
   "main": "index.js",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --inline --port 8082 --host 0.0.0.0",
+    "dev": "webpack-dev-server --inline --port 8082 --host 0.0.0.0 --config webpack.dev.config.js",
     "release": "webpack"
   },
   "keywords": [

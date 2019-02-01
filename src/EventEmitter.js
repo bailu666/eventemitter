@@ -1,19 +1,16 @@
 /**
- * @file 事件封装类
- * @author qiaogang
+ * @file EventEmitter
+ * @author redmed
  */
 
-import { assign, trim } from './Util';
+import { assign, trim, isNul } from './Util';
 let _uid = -1;
 
 // space-separated
 const SS = /\s+/;
 
-class EventEmitter {
+export class EventEmitter {
 
-    /**
-     * 构造函数
-     */
     constructor() {
 
         /**
@@ -24,7 +21,7 @@ class EventEmitter {
         this.__events__ = {};
 
         /**
-         *
+         * 唯一标识
          * @type {number}
          * @private
          */
@@ -34,7 +31,7 @@ class EventEmitter {
 
     /**
      * 事件绑定, 不支持过滤重复添加
-     * @param {string} types
+     * @param {string} types 事件名。支持多个，以空格分割
      * @param {Function} listener
      * @param {*=} context
      * @returns {EventEmitter}
@@ -45,8 +42,7 @@ class EventEmitter {
 
         let i = -1, len = types.length;
         while (++i < len) {
-            let type = types[i];
-            this._on(type, listener, context);
+            this._on(types[i], listener, context);
         }
 
         return this;
@@ -54,22 +50,22 @@ class EventEmitter {
 
     _on(type, listener, context) {
 
-        let events = this.__events__;
+        const events = this.__events__;
 
-        let listeners = events[type] = events[type] || [];
+        const listeners = events[type] = events[type] || [];
         if (context === this) {
             context = undefined;
         }
+
         let i = -1, len = listeners;
         while (++i < len) {
-            let { fn, ctx } = listeners[i];
+            const { fn, ctx } = listeners[i];
             if (fn === listener && ctx === context) {
                 return this;
             }
         }
 
-        let newListener = { fn: listener, ctx: context };
-        listeners.push(newListener);
+        listeners.push({ fn: listener, ctx: context });
 
         return this;
 
@@ -104,7 +100,8 @@ class EventEmitter {
      */
     off(types, listener, context) {
 
-        if (!types) {
+        // Unbind all
+        if (isNul(types)) {
             this.__events__ = {};
 
             return this;
@@ -114,7 +111,7 @@ class EventEmitter {
 
         let j = -1, len = types.length;
         while (++j < len) {
-            let type = types[j];
+            const type = types[j];
             if (type) {
                 this._off(type, listener, context);
             }
@@ -125,22 +122,24 @@ class EventEmitter {
 
     _off(type, listener, context) {
 
-        if (!type) {
+        // Unbind all
+        if (isNul(type)) {
             this.__events__ = {};
 
             return this;
         }
 
-        let events = this.__events__;
-        if (!listener) {
+        // Unbind type
+        const events = this.__events__;
+        if (isNul(listener)) {
             delete events[type];
 
             return this;
         }
 
-        let listeners = events[type];
+        // Unbind listener
+        const listeners = events[type];
         if (listeners) {
-
             let i = listeners.length;
             while (--i >= 0) {
                 let { fn, ctx } = listeners[i];
@@ -167,9 +166,9 @@ class EventEmitter {
 
         if (!this._listens(type, propagate)) return this;
 
-        let listeners = this.__events__[type];
+        const listeners = this.__events__[type];
 
-        let event = assign({}, data, {
+        const event = assign({}, data, {
             target: this,
             type
         });
@@ -178,13 +177,12 @@ class EventEmitter {
             let i = -1,
                 len = listeners.length;
             while (++i < len) {
-                let { fn, ctx } = listeners[i];
+                const { fn, ctx } = listeners[i];
                 fn.call(ctx || this, event);
             }
         }
 
         if (propagate) {
-
             // propagate the event to parents (set with addEventParent)
             this._propagateEvent(event);
         }
@@ -194,8 +192,8 @@ class EventEmitter {
 
     /**
      * 添加父级事件链
-     * @param {EventEmitter} ee
-     * @param {Function=} fn
+     * @param {EventEmitter} ee 需要绑定的父级 EE
+     * @param {Function=} fn 触发父级事件时的回调函数
      * @returns {EventEmitter}
      */
     addEventParent(ee, fn) {
@@ -218,10 +216,10 @@ class EventEmitter {
 
     _propagateEvent(ev) {
 
-        let eParents = this._eventParents;
+        const eParents = this._eventParents;
 
         for (let id in eParents) {
-            let { target, fn } = eParents[id];
+            const { target, fn } = eParents[id];
             let args = assign({}, {
                 propagatedFrom: ev.target
             }, ev);
@@ -231,15 +229,22 @@ class EventEmitter {
         }
     }
 
+    /**
+     * 检查事件链及父级事件链上是否有绑定事件
+     * @param {string} type
+     * @param {boolean=} propagate
+     * @returns {boolean}
+     * @private
+     */
     _listens(type, propagate) {
-        var listeners = this.__events__ && this.__events__[type];
-        if (listeners && listeners.length) { return true; }
+        const listeners = this.__events__ && this.__events__[type];
+        if (listeners && listeners.length) return true;
 
         if (propagate) {
             // also check parents for listeners if event propagates
-            let eParents = this._eventParents;
+            const eParents = this._eventParents;
             for (let id in eParents) {
-                if (eParents[id].target._listens(type, propagate)) { return true; }
+                if (eParents[id].target._listens(type, propagate)) return true;
             }
         }
 
@@ -254,13 +259,7 @@ class EventEmitter {
         return this.__events__;
     }
 
-    /**
-     * 唯一标识
-     * @returns {number}
-     */
     get id() {
         return this.__id__;
     }
 }
-
-export default EventEmitter;
