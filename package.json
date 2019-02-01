@@ -1,7 +1,7 @@
 {
   "name": "@redmed/eventemitter",
-  "version": "1.0.0",
-  "description": "An EventEmitter Class",
+  "version": "0.9.0",
+  "description": "An EventEmitter Class. Support add event parent.",
   "main": "index.js",
   "directories": {
     "doc": "doc"
